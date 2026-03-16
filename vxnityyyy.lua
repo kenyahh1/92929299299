@@ -696,8 +696,8 @@ local function LoadVxnityHub()
     end
 })
     HelpersTab:Toggle({
-    Title = "GOD Ball Magnet INF",
-    Desc = "Ultimate magnet for aerial inf, CPU friendly",
+    Title = "Kenyah INF TER/AIR",
+    Desc = "Balón rapidísimo pegado al torso, útil en tierra y aire",
     Callback = function(state)
 
         local RunService = game:GetService("RunService")
@@ -706,13 +706,7 @@ local function LoadVxnityHub()
 
         if state then
 
-            local lastUpdate = tick()
-            local updateRate = 0.03 -- aprox 33 veces por segundo
-
-            _G.GODBallMagnet = RunService.Heartbeat:Connect(function()
-
-                if tick() - lastUpdate < updateRate then return end
-                lastUpdate = tick()
+            _G.KenyahINF = RunService.Heartbeat:Connect(function()
 
                 local char = player.Character
                 if not char then return end
@@ -735,33 +729,41 @@ local function LoadVxnityHub()
                 -- quitar física innecesaria
                 ball.CanCollide = false
                 ball.Massless = true
+                ball.AssemblyLinearVelocity = Vector3.zero
+                ball.AssemblyAngularVelocity = Vector3.zero
 
                 -- posición pegada al torso
-                local magnetPos = base.Position + base.CFrame.LookVector * 0.15 + Vector3.new(0,0.35,0)
-                local direction = magnetPos - ball.Position
+                local magnetPos = base.Position + base.CFrame.LookVector * 0.25 + Vector3.new(0,0.45,0)
 
-                -- si está lejos → teleporta y pega al instante
-                if direction.Magnitude > 3 then
+                -- determinar si estás en aire o suelo
+                local humanoid = char:FindFirstChild("Humanoid")
+                local onGround = humanoid and humanoid.FloorMaterial ~= Enum.Material.Air
+
+                if onGround then
+                    -- movimiento terrestre: velocidad brutal pero natural
+                    local direction = magnetPos - ball.Position
+                    ball.AssemblyLinearVelocity = direction.Unit * 2500
+                else
+                    -- movimiento aéreo: teletransportar para inf aéreo
                     ball.CFrame = CFrame.new(magnetPos)
                     ball.AssemblyLinearVelocity = Vector3.zero
-                    ball.AssemblyAngularVelocity = Vector3.zero
-                else
-                    -- si está cerca → velocidad muy alta para inf
-                    ball.AssemblyLinearVelocity = direction * 300
-                    ball.AssemblyAngularVelocity = Vector3.zero
                 end
+
+                -- asegurar que el balón siga pegado en todas perspectivas
+                ball.Parent = workspace
 
             end)
 
         else
-            if _G.GODBallMagnet then
-                _G.GODBallMagnet:Disconnect()
-                _G.GODBallMagnet = nil
+            if _G.KenyahINF then
+                _G.KenyahINF:Disconnect()
+                _G.KenyahINF = nil
             end
         end
 
     end
 })
+    
     HelpersTab:Section({ Title = "Air Dribble Assistance" })
 
     HelpersTab:Toggle({
