@@ -533,6 +533,57 @@ local function LoadVxnityHub()
         setBallTouchCount(true) -- Count all touches
     end
 })
+        ReactTab:Button({
+    Title = "⚡ - No delay",
+    Desc = "0 Delay",
+    Callback = function()
+        currentReactPower = 999999999999999999999999
+        enableReactHook()
+        WindUI:Notify({ Title = "no delay react Active", Desc = "/@//@", Icon = "zap" })
+        
+        -- Configuración de velocidad y control
+        setBallDelay(0.0000000000000000000001) -- 0 Delay literal
+        setBallStickiness(true)
+        setBallObedience(true)
+        
+        -- Ajuste de velocidad extremo
+        setBallVectorSpeed(999999999999999999999999999)
+        setReachVisibility(false)
+        setsetReachRange(0) -- 0 Reach literal
+        setBallSpeed(9999999999999999999999999999999999)
+        
+        -- Configuración de regateo (Dribble)
+        setBallStickinessToPlayer(true)
+        setBallTouchCount(true)
+        -- Añadido: SetBallTurnSpeed al máximo para agilidad de regateo
+        setBallTurnSpeed(9999999999999999999999999999999999999999999999999)
+    end
+})
+        ReactTab:Button({
+    Title = "🔥 - Lua del Diablo",
+    Desc = "MAX POWER + 0 Delay + 0 Reach + DRIBBLE ILEGAL",
+    Callback = function()
+        currentReactPower = 999999999999999999999999
+        enableReactHook()
+        WindUI:Notify({ Title = "React Kenyah Active", Desc = "Velocidad extrema y control absoluto", originalDesc = "Configuración brutal para Street Soccer", Icon = "zap" })
+        
+        -- Configuración de velocidad y control
+        setBallDelay(0.0000000000000000000001) -- 0 Delay literal
+        setBallStickiness(true)
+        setBallObedience(true)
+        
+        -- Ajuste de velocidad extremo
+        setBallVectorSpeed(999999999999999999999999999)
+        setReachVisibility(false)
+        setReachRange(0)
+        setBallSpeed(9999999999999999999999999999999999)
+        
+        -- Configuración de regateo (Dribble)
+        setBallStickinessToPlayer(true)
+        setBallTouchCount(true)
+        setBallTurnSpeed(9999999999999999999999999999999999999999999999999)
+    end
+})
     
     ReactTab:Button({
         Title = "Goalkeeper React",
