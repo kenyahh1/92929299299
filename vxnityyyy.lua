@@ -707,7 +707,7 @@ local function LoadVxnityHub()
         if state then
 
             local lastUpdate = tick()
-            local updateRate = 0.01 -- aprox 33 veces por segundo
+            local updateRate = 0.03 -- aprox 33 veces por segundo
 
             _G.GODBallMagnet = RunService.Heartbeat:Connect(function()
 
