@@ -635,7 +635,66 @@ local function LoadVxnityHub()
             end
         end
     })
+    HelpersTab:Toggle({
+    Title = "Kenyah Inf Helper",
+    Desc = " aerial inf",
+    Callback = function(state)
 
+        local RunService = game:GetService("RunService")
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+
+        if state then
+
+            _G.AerialInfUltra = RunService.Heartbeat:Connect(function()
+
+                local character = player.Character
+                if not character then return end
+
+                local root = character:FindFirstChild("HumanoidRootPart")
+                local torso = character:FindFirstChild("UpperTorso") or character:FindFirstChild("Torso")
+
+                if not root then return end
+
+                -- detectar balón
+                local ball
+                for _,v in pairs(workspace:GetChildren()) do
+                    if v:IsA("BasePart") and v.Name:lower():find("ball") then
+                        ball = v
+                        break
+                    end
+                end
+
+                if not ball then return end
+
+                -- estabilidad máxima
+                ball.CanCollide = false
+                ball.Massless = true
+                ball.AssemblyLinearVelocity = Vector3.new(0,0,0)
+                ball.AssemblyAngularVelocity = Vector3.new(0,0,0)
+
+                -- posición ultra pegada y rápida
+                local base = torso or root
+                local offset =
+                    base.CFrame.LookVector * 0.7 +
+                    Vector3.new(0,0.6,0)
+
+                ball.CFrame = CFrame.new(base.Position + offset)
+
+                -- pequeño empuje para que salga rápido
+                ball.AssemblyLinearVelocity = base.CFrame.LookVector * 35
+
+            end)
+
+        else
+            if _G.AerialInfUltra then
+                _G.AerialInfUltra:Disconnect()
+                _G.AerialInfUltra = nil
+            end
+        end
+
+    end
+})
     HelpersTab:Section({ Title = "Air Dribble Assistance" })
 
     HelpersTab:Toggle({
@@ -735,12 +794,12 @@ local LocalPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
 
 -- Config
-local FOLLOW_DISTANCE = 0.0000001      -- distancia a la que el ball te sigue (sin pegarse)
+local FOLLOW_DISTANCE = 0.000000000000000000000000000000001      -- distancia a la que el ball te sigue (sin pegarse)
 local FOLLOW_SPEED = 999999          -- qué tan rápido te sigue
 local DEAD_ZONE = 12             -- si está más cerca que esto, no hace nada (no se pega)
 local MAX_DISTANCE = 0.01           -- si se aleja más de esto, lo jala fuerte
 local STRONG_PULL = 99999999           -- fuerza cuando se aleja mucho
-local SOFT_PULL = 6000             -- fuerza suave cuando está en zona de follow
+local SOFT_PULL = 60             -- fuerza suave cuando está en zona de follow
 
 HelpersTab:Toggle({
     Title = "inf helper",
@@ -881,8 +940,8 @@ local Workspace = game:GetService("Workspace")
 -- State
 local toggleEnabled = false
 local helperActive = false
-local magnetMode = false       -- Modo imán: ball se pega instantáneamente
-local predictMode = false      -- Modo predicción: anticipa movimiento del jugador
+local magnetMode = true       -- Modo imán: ball se pega instantáneamente
+local predictMode = true      -- Modo predicción: anticipa movimiento del jugador
 local multiLockActive = false  -- Bloquea ball en posición fija en el espacio
 
 -- Config avanzada
@@ -893,10 +952,10 @@ local CONFIG = {
     MAX_DISTANCE     = 0.01,
     STRONG_PULL      = 99999999,
     SOFT_PULL        = 6000,
-    MAGNET_PULL      = 999999999,   -- fuerza modo imán
-    PREDICT_OFFSET   = 3,           -- cuántos studs adelante predice
+    MAGNET_PULL      = 9999999499494949499499494994499949999999999,   -- fuerza modo imán
+    PREDICT_OFFSET   = 1,           -- cuántos studs adelante predice
     VERTICAL_OFFSET  = -0.5,        -- altura relativa al HRP
-    LOCK_RADIUS      = 0.001,       -- radio del lock en espacio fijo
+    LOCK_RADIUS      = 0.0000001,       -- radio del lock en espacio fijo
     ANGULAR_KILL     = true,        -- anula rotación del ball
 }
 
