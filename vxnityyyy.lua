@@ -761,8 +761,7 @@ local function LoadVxnityHub()
         end
 
     end
-})
-    
+})   
 })
     HelpersTab:Section({ Title = "Air Dribble Assistance" })
 
