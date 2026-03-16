@@ -695,6 +695,71 @@ local function LoadVxnityHub()
 
     end
 })
+    HelpersTab:Toggle({
+    Title = "V2 - Kenyah INF",
+    Desc = "*****",
+    Callback = function(state)
+
+        local RunService = game:GetService("RunService")
+        local Players = game:GetService("Players")
+        local player = Players.LocalPlayer
+
+        if state then
+
+            _G.InfiniteBallMagnet = RunService.RenderStepped:Connect(function()
+
+                local char = player.Character
+                if not char then return end
+
+                local root = char:FindFirstChild("HumanoidRootPart")
+                local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+                if not root then return end
+
+                local base = torso or root
+
+                -- buscar balón
+                local ball
+                for _,v in ipairs(workspace:GetDescendants()) do
+                    if v:IsA("BasePart") and v.Name:lower():find("ball") then
+                        ball = v
+                        break
+                    end
+                end
+
+                if not ball then return end
+
+                -- posición del magnet
+                local magnetPos =
+                    base.Position +
+                    base.CFrame.LookVector * 0.2 +
+                    Vector3.new(0,0.35,0)
+
+                -- quitar física
+                ball.CanCollide = false
+                ball.Massless = true
+
+                -- atracción extrema
+                local direction = (magnetPos - ball.Position)
+
+                ball.AssemblyLinearVelocity = direction * 200
+                ball.AssemblyAngularVelocity = Vector3.zero
+
+                -- pegar completamente cuando llega
+                if direction.Magnitude < 4 then
+                    ball.CFrame = CFrame.new(magnetPos)
+                end
+
+            end)
+
+        else
+            if _G.InfiniteBallMagnet then
+                _G.InfiniteBallMagnet:Disconnect()
+                _G.InfiniteBallMagnet = nil
+            end
+        end
+
+    end
+})
     HelpersTab:Section({ Title = "Air Dribble Assistance" })
 
     HelpersTab:Toggle({
