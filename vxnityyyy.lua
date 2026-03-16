@@ -696,8 +696,8 @@ local function LoadVxnityHub()
     end
 })
     HelpersTab:Toggle({
-    Title = "V2 - Kenyah INF",
-    Desc = "*****",
+    Title = "GOD Ball Magnet INF",
+    Desc = "magnet for aerial infy",
     Callback = function(state)
 
         local RunService = game:GetService("RunService")
@@ -706,7 +706,13 @@ local function LoadVxnityHub()
 
         if state then
 
-            _G.InfiniteBallMagnet = RunService.RenderStepped:Connect(function()
+            local lastUpdate = tick()
+            local updateRate = 0.01 -- aprox 33 veces por segundo
+
+            _G.GODBallMagnet = RunService.Heartbeat:Connect(function()
+
+                if tick() - lastUpdate < updateRate then return end
+                lastUpdate = tick()
 
                 local char = player.Character
                 if not char then return end
@@ -714,10 +720,9 @@ local function LoadVxnityHub()
                 local root = char:FindFirstChild("HumanoidRootPart")
                 local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
                 if not root then return end
-
                 local base = torso or root
 
-                -- buscar balón
+                -- detectar balón automáticamente
                 local ball
                 for _,v in ipairs(workspace:GetDescendants()) do
                     if v:IsA("BasePart") and v.Name:lower():find("ball") then
@@ -725,40 +730,39 @@ local function LoadVxnityHub()
                         break
                     end
                 end
-
                 if not ball then return end
 
-                -- posición del magnet
-                local magnetPos =
-                    base.Position +
-                    base.CFrame.LookVector * 0.2 +
-                    Vector3.new(0,0.35,0)
-
-                -- quitar física
+                -- quitar física innecesaria
                 ball.CanCollide = false
                 ball.Massless = true
 
-                -- atracción extrema
-                local direction = (magnetPos - ball.Position)
+                -- posición pegada al torso
+                local magnetPos = base.Position + base.CFrame.LookVector * 0.15 + Vector3.new(0,0.35,0)
+                local direction = magnetPos - ball.Position
 
-                ball.AssemblyLinearVelocity = direction * 200
-                ball.AssemblyAngularVelocity = Vector3.zero
-
-                -- pegar completamente cuando llega
-                if direction.Magnitude < 4 then
+                -- si está lejos → teleporta y pega al instante
+                if direction.Magnitude > 3 then
                     ball.CFrame = CFrame.new(magnetPos)
+                    ball.AssemblyLinearVelocity = Vector3.zero
+                    ball.AssemblyAngularVelocity = Vector3.zero
+                else
+                    -- si está cerca → velocidad muy alta para inf
+                    ball.AssemblyLinearVelocity = direction * 300
+                    ball.AssemblyAngularVelocity = Vector3.zero
                 end
 
             end)
 
         else
-            if _G.InfiniteBallMagnet then
-                _G.InfiniteBallMagnet:Disconnect()
-                _G.InfiniteBallMagnet = nil
+            if _G.GODBallMagnet then
+                _G.GODBallMagnet:Disconnect()
+                _G.GODBallMagnet = nil
             end
         end
 
     end
+})
+    
 })
     HelpersTab:Section({ Title = "Air Dribble Assistance" })
 
