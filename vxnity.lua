@@ -1375,24 +1375,3 @@ ShowSystemLoader(function()
     task.wait(0.1) -- Parche de seguridad para asegurar limpieza de UI
     LoadVxnityHub()
 end)
-task.spawn(function()
-    local TweenService = game:GetService("TweenService")
-
-    for _,v in pairs(game.CoreGui:GetDescendants()) do
-        if v:IsA("TextButton") then
-
-            v.MouseEnter:Connect(function()
-                TweenService:Create(v, TweenInfo.new(0.15), {
-                    BackgroundColor3 = Color3.fromRGB(255,60,60)
-                }):Play()
-            end)
-
-            v.MouseLeave:Connect(function()
-                TweenService:Create(v, TweenInfo.new(0.15), {
-                    BackgroundColor3 = Color3.fromRGB(20,20,20)
-                }):Play()
-            end)
-
-        end
-    end
-end)
