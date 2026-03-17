@@ -1445,30 +1445,76 @@ task.spawn(function()
         end
     end
 end)
-
-
 task.spawn(function()
     local TweenService = game:GetService("TweenService")
 
-    while true do
-        for _,v in pairs(game.CoreGui:GetDescendants()) do
-            if v:IsA("UIStroke") then
-                TweenService:Create(v, TweenInfo.new(1), {
-                    Transparency = 0.2
-                }):Play()
+    local Theme = {
+        Main = Color3.fromRGB(18,18,18),
+        Accent = Color3.fromRGB(170,0,0),
+        Accent2 = Color3.fromRGB(255,60,60),
+        Text = Color3.fromRGB(255,255,255)
+    }
+
+    local function Tween(obj, props, t)
+        TweenService:Create(obj, TweenInfo.new(t or 0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), props):Play()
+    end
+
+    -- 🔁 LOOP INTELIGENTE (NO LAG)
+    while task.wait(0.5) do
+        for _,v in pairs(game:GetDescendants()) do
+
+            -- SOLO UI
+            if v:IsDescendantOf(game.CoreGui) then
+
+                -- 🎨 FRAMES
+                if v:IsA("Frame") then
+                    v.BackgroundColor3 = Theme.Main
+
+                    if not v:FindFirstChildOfClass("UICorner") then
+                        local c = Instance.new("UICorner")
+                        c.CornerRadius = UDim.new(0, 8)
+                        c.Parent = v
+                    end
+
+                    if not v:FindFirstChildOfClass("UIStroke") then
+                        local s = Instance.new("UIStroke")
+                        s.Color = Theme.Accent
+                        s.Transparency = 0.5
+                        s.Thickness = 1.5
+                        s.Parent = v
+                    end
+                end
+
+                -- 📝 TEXTO
+                if v:IsA("TextLabel") or v:IsA("TextButton") then
+                    v.TextColor3 = Theme.Text
+                    v.Font = Enum.Font.GothamBold
+                end
+
+                -- 🔘 BOTONES
+                if v:IsA("TextButton") and not v:FindFirstChild("Animated") then
+                    v.BackgroundColor3 = Theme.Main
+
+                    local tag = Instance.new("BoolValue")
+                    tag.Name = "Animated"
+                    tag.Parent = v
+
+                    v.MouseEnter:Connect(function()
+                        Tween(v, {BackgroundColor3 = Theme.Accent2}, 0.15)
+                    end)
+
+                    v.MouseLeave:Connect(function()
+                        Tween(v, {BackgroundColor3 = Theme.Main}, 0.15)
+                    end)
+                end
+
+                -- 📜 SCROLL
+                if v:IsA("ScrollingFrame") then
+                    v.ScrollBarThickness = 4
+                    v.ScrollBarImageColor3 = Theme.Accent
+                end
+
             end
         end
-
-        task.wait(1)
-
-        for _,v in pairs(game.CoreGui:GetDescendants()) do
-            if v:IsA("UIStroke") then
-                TweenService:Create(v, TweenInfo.new(1), {
-                    Transparency = 0.6
-                }):Play()
-            end
-        end
-
-        task.wait(1)
     end
 end)
