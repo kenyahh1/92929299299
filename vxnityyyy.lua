@@ -696,68 +696,74 @@ local function LoadVxnityHub()
     end
 })
     HelpersTab:AddToggle({
-    Title = "Kenyah INF TER/AIR [MODO DIOS]",
-    Desc = "Balón teleportado instantáneamente, ultra-rápido (200ms) y sin lag",
+    Title = "Kenyah INF TER/AIR [PRO HELPER]",
+    Desc = "El balón sigue su camino normal pero es seguido por un helper gigante",
     Callback = function(state)
         local RunService = game:GetService("RunService")
         local Players = game:GetService("Players")
         local player = Players.LocalPlayer
-        
+        local char = player.Character
+
         if state then
-            -- Cache de variables para optimizar
-            local char = player.Character
-            local root = char:FindFirstChild("HumanoidRootPart")
-            local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
-            local base = torso or root
-            local humanoid = char:FindFirstChild("Humanoid")
-            
-            -- Detector de balón optimizado (solo busca una vez)
-            local ball
-            for _, v in ipairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") and v.Name:lower():find("ball") then
-                    ball = v
-                    break
+            -- Variables de configuración
+            local config = {
+                speed = 5000,           -- Velocidad del helper
+                magnetDistance = 0.2,   -- Distancia mínima para acercarse
+                followHeight = 0.45,    -- Altura del helper respecto al balón
+                magnetPos = nil
+            }
+
+            -- Función de movimiento del helper (muy optimizada)
+            local function updateHelper()
+                local char = player.Character
+                if not char then return end
+
+                local root = char:FindFirstChild("HumanoidRootPart")
+                local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+                local humanoid = char:FindFirstChild("Humanoid")
+                
+                -- Buscar balón automáticamente
+                local ball
+                for _, v in ipairs(workspace:GetDescendants()) do
+                    if v:IsA("BasePart") and v.Name:lower():find("ball") then
+                        ball = v
+                        break
+                    end
+                end
+
+                if not ball then return end
+                if not root then return end
+
+                -- Posición objetivo (segunda posición del helper)
+                local magnetPos = (torso or root).Position + (torso or root).CFrame.LookVector * 0.5 + Vector3.new(0, 0.45, 0)
+
+                -- Calcular dirección y velocidad
+                local direction = magnetPos - ball.Position
+                local distance = direction.Magnitude
+
+                if distance > config.magnetDistance then
+                    -- Mover el helper hacia el balón (velocidad alta)
+                    ball.AssemblyLinearVelocity = direction.Unit * config.speed
+                else
+                    -- Si está cerca, simplemente seguirlo de cerca
+                    ball.AssemblyLinearVelocity = Vector3.zero
                 end
             end
-            
-            if not ball then return end
-            
-            -- Pre-configuración del balón (solo una vez)
-            ball.CanCollide = false
-            ball.Massless = true
-            ball.Anchored = false -- Importante para teleportación instantánea
-            
-            -- MODO DIOS: Teleportación instantánea cada 200ms
-            _G.KenyahINF = spawn(function()
-                while state do
-                    if not char or not root or not humanoid then break end
-                    
-                    -- Posición objetivo (pegada al torso)
-                    local magnetPos = base.Position + base.CFrame.LookVector * 0.25 + Vector3.new(0, 0.45, 0)
-                    
-                    -- DETECCIÓN AUTOMÁTICA DE TIERRA/AIRE
-                    local onGround = humanoid.FloorMaterial ~= Enum.Material.Air
-                    
-                    if onGround then
-                        -- Terrestre: Velocidad ULTRA-BRUTAL (10,000+)
-                        ball.AssemblyLinearVelocity = (magnetPos - ball.Position).Unit * 10000
-                    else
-                        -- Aéreo: Teleportación instantánea (más rápido que CFrame)
-                        ball.Position = magnetPos
-                        ball.Orientation = base.Orientation
-                    end
-                    
-                    -- Control de velocidad (200ms = 0.2 segundos)
-                    task.wait(0.2)
-                end
+
+            -- Conexión optimizada a RenderStepped (200ms)
+            _G.KenyahINF = RunService.RenderStepped:Connect(function()
+                updateHelper()
             end)
         else
             if _G.KenyahINF then
-                _G.KenyahINF = nil -- Termina el spawn
+                _G.KenyahINF:Disconnect()
+                _G.KenyahINF = nil
             end
         end
     end
 })
+    
+                
     
     HelpersTab:Section({ Title = "Air Dribble Assistance" })
 
