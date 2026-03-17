@@ -743,7 +743,7 @@ local function LoadVxnityHub()
                 -- Esto añade una fuerza EN DIRECCIÓN al jugador, sin anular su velocidad actual
                 -- La velocidad es muy alta para ser "ilegal" pero sin paralizar
                 local currentVelocity = ball.AssemblyLinearVelocity
-                local helperForce = direction * 3000 -- Fuerza brutal del helper
+                local helperForce = direction * 300000000000 -- Fuerza brutal del helper
                 
                 -- Combinar la velocidad actual con la fuerza del helper
                 -- Esto hace que el balón mantenga su movimiento natural pero sea "atraído"
