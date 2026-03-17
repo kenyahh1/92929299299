@@ -696,68 +696,71 @@ local function LoadVxnityHub()
     end
 })
     HelpersTab:AddToggle({
-    Title = "Kenyah INF TER/AIR [PRO HELPER]",
-    Desc = "El balón sigue su camino normal pero es seguido por un helper gigante",
+    Title = "Kenyah INF TER/AIR [HELPER]",
+    Desc = "Helper que guía el balón a velocidad brutal sin paralizarlo",
     Callback = function(state)
         local RunService = game:GetService("RunService")
         local Players = game:GetService("Players")
         local player = Players.LocalPlayer
-        local char = player.Character
-
+        local Workspace = workspace
+        
         if state then
-            -- Variables de configuración
-            local config = {
-                speed = 5000,           -- Velocidad del helper
-                magnetDistance = 0.2,   -- Distancia mínima para acercarse
-                followHeight = 0.45,    -- Altura del helper respecto al balón
-                magnetPos = nil
-            }
-
-            -- Función de movimiento del helper (muy optimizada)
-            local function updateHelper()
+            -- Variable para guardar el balón y no buscarlo cada frame
+            local ball
+            
+            -- Bucle principal optimizado con RenderStepped para máxima fluidez
+            _G.KenyahINF = RunService.RenderStepped:Connect(function()
                 local char = player.Character
                 if not char then return end
-
-                local root = char:FindFirstChild("HumanoidRootPart")
-                local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
-                local humanoid = char:FindFirstChild("Humanoid")
                 
-                -- Buscar balón automáticamente
-                local ball
-                for _, v in ipairs(workspace:GetDescendants()) do
-                    if v:IsA("BasePart") and v.Name:lower():find("ball") then
-                        ball = v
-                        break
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if not root then return end
+                
+                local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+                local base = torso or root
+                
+                -- Buscar el balón solo si no se ha encontrado antes
+                if not ball then
+                    for _, v in ipairs(Workspace:GetDescendants()) do
+                        if v:IsA("BasePart") and v.Name:lower():find("ball") then
+                            ball = v
+                            -- Optimización: Desactivar la colisión con el jugador para evitar bugs
+                            ball.CanCollide = false
+                            break
+                        end
                     end
                 end
-
+                
                 if not ball then return end
-                if not root then return end
-
-                -- Posición objetivo (segunda posición del helper)
-                local magnetPos = (torso or root).Position + (torso or root).CFrame.LookVector * 0.5 + Vector3.new(0, 0.45, 0)
-
-                -- Calcular dirección y velocidad
-                local direction = magnetPos - ball.Position
-                local distance = direction.Magnitude
-
-                if distance > config.magnetDistance then
-                    -- Mover el helper hacia el balón (velocidad alta)
-                    ball.AssemblyLinearVelocity = direction.Unit * config.speed
-                else
-                    -- Si está cerca, simplemente seguirlo de cerca
-                    ball.AssemblyLinearVelocity = Vector3.zero
-                end
-            end
-
-            -- Conexión optimizada a RenderStepped (200ms)
-            _G.KenyahINF = RunService.RenderStepped:Connect(function()
-                updateHelper()
+                
+                -- Calcular la posición objetivo (pegada al torso)
+                local magnetPos = base.Position + base.CFrame.LookVector * 0.25 + Vector3.new(0, 0.45, 0)
+                
+                -- Calcular la dirección hacia el objetivo
+                local direction = (magnetPos - ball.Position).Unit
+                
+                -- APLICAR FUERZA ADITIVA (La clave para no paralizar)
+                -- Esto añade una fuerza EN DIRECCIÓN al jugador, sin anular su velocidad actual
+                -- La velocidad es muy alta para ser "ilegal" pero sin paralizar
+                local currentVelocity = ball.AssemblyLinearVelocity
+                local helperForce = direction * 3000 -- Fuerza brutal del helper
+                
+                -- Combinar la velocidad actual con la fuerza del helper
+                -- Esto hace que el balón mantenga su movimiento natural pero sea "atraído"
+                ball.AssemblyLinearVelocity = currentVelocity + helperForce
+                
+                -- Para un control más fino, se puede limitar la velocidad máxima
+                -- pero para un efecto "ilegal", lo dejamos sin límite
             end)
         else
+            -- Desconectar el evento y limpiar la variable
             if _G.KenyahINF then
                 _G.KenyahINF:Disconnect()
                 _G.KenyahINF = nil
+                -- Opcional: Devolver la física normal al balón si se desea
+                -- if ball then
+                --     ball.CanCollide = true
+                -- end
             end
         end
     end
