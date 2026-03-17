@@ -62,7 +62,7 @@ local function ShowSystemLoader(onFinished)
         "Initializing",
         "Loading modules",
         "¿Kenyah?",
-        "¿ Kenyah On Top ?"
+        "pronto new act."
     }
 
     for _, text in ipairs(steps) do
@@ -695,72 +695,67 @@ local function LoadVxnityHub()
 
     end
 })
-    HelpersTab:Toggle({
-    Title = "Kenyah INF TER/AIR",
-    Desc = "Balón rapidísimo pegado al torso, útil en tierra y aire",
+    HelpersTab:AddToggle({
+    Title = "Kenyah INF TER/AIR [MODO DIOS]",
+    Desc = "Balón teleportado instantáneamente, ultra-rápido (200ms) y sin lag",
     Callback = function(state)
-
         local RunService = game:GetService("RunService")
         local Players = game:GetService("Players")
         local player = Players.LocalPlayer
-
+        
         if state then
-
-            _G.KenyahINF = RunService.Heartbeat:Connect(function()
-
-                local char = player.Character
-                if not char then return end
-
-                local root = char:FindFirstChild("HumanoidRootPart")
-                local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
-                if not root then return end
-                local base = torso or root
-
-                -- detectar balón automáticamente
-                local ball
-                for _,v in ipairs(workspace:GetDescendants()) do
-                    if v:IsA("BasePart") and v.Name:lower():find("ball") then
-                        ball = v
-                        break
+            -- Cache de variables para optimizar
+            local char = player.Character
+            local root = char:FindFirstChild("HumanoidRootPart")
+            local torso = char:FindFirstChild("UpperTorso") or char:FindFirstChild("Torso")
+            local base = torso or root
+            local humanoid = char:FindFirstChild("Humanoid")
+            
+            -- Detector de balón optimizado (solo busca una vez)
+            local ball
+            for _, v in ipairs(workspace:GetDescendants()) do
+                if v:IsA("BasePart") and v.Name:lower():find("ball") then
+                    ball = v
+                    break
+                end
+            end
+            
+            if not ball then return end
+            
+            -- Pre-configuración del balón (solo una vez)
+            ball.CanCollide = false
+            ball.Massless = true
+            ball.Anchored = false -- Importante para teleportación instantánea
+            
+            -- MODO DIOS: Teleportación instantánea cada 200ms
+            _G.KenyahINF = spawn(function()
+                while state do
+                    if not char or not root or not humanoid then break end
+                    
+                    -- Posición objetivo (pegada al torso)
+                    local magnetPos = base.Position + base.CFrame.LookVector * 0.25 + Vector3.new(0, 0.45, 0)
+                    
+                    -- DETECCIÓN AUTOMÁTICA DE TIERRA/AIRE
+                    local onGround = humanoid.FloorMaterial ~= Enum.Material.Air
+                    
+                    if onGround then
+                        -- Terrestre: Velocidad ULTRA-BRUTAL (10,000+)
+                        ball.AssemblyLinearVelocity = (magnetPos - ball.Position).Unit * 10000
+                    else
+                        -- Aéreo: Teleportación instantánea (más rápido que CFrame)
+                        ball.Position = magnetPos
+                        ball.Orientation = base.Orientation
                     end
+                    
+                    -- Control de velocidad (200ms = 0.2 segundos)
+                    task.wait(0.2)
                 end
-                if not ball then return end
-
-                -- quitar física innecesaria
-                ball.CanCollide = false
-                ball.Massless = true
-                ball.AssemblyLinearVelocity = Vector3.zero
-                ball.AssemblyAngularVelocity = Vector3.zero
-
-                -- posición pegada al torso
-                local magnetPos = base.Position + base.CFrame.LookVector * 0.25 + Vector3.new(0,0.45,0)
-
-                -- determinar si estás en aire o suelo
-                local humanoid = char:FindFirstChild("Humanoid")
-                local onGround = humanoid and humanoid.FloorMaterial ~= Enum.Material.Air
-
-                if onGround then
-                    -- movimiento terrestre: velocidad brutal pero natural
-                    local direction = magnetPos - ball.Position
-                    ball.AssemblyLinearVelocity = direction.Unit * 2500
-                else
-                    -- movimiento aéreo: teletransportar para inf aéreo
-                    ball.CFrame = CFrame.new(magnetPos)
-                    ball.AssemblyLinearVelocity = Vector3.zero
-                end
-
-                -- asegurar que el balón siga pegado en todas perspectivas
-                ball.Parent = workspace
-
             end)
-
         else
             if _G.KenyahINF then
-                _G.KenyahINF:Disconnect()
-                _G.KenyahINF = nil
+                _G.KenyahINF = nil -- Termina el spawn
             end
         end
-
     end
 })
     
@@ -867,8 +862,8 @@ local FOLLOW_DISTANCE = 0.000000000000000000000000000000001      -- distancia a 
 local FOLLOW_SPEED = 999999          -- qué tan rápido te sigue
 local DEAD_ZONE = 12             -- si está más cerca que esto, no hace nada (no se pega)
 local MAX_DISTANCE = 0.01           -- si se aleja más de esto, lo jala fuerte
-local STRONG_PULL = 99999999           -- fuerza cuando se aleja mucho
-local SOFT_PULL = 60             -- fuerza suave cuando está en zona de follow
+local STRONG_PULL = 9999999999999999999           -- fuerza cuando se aleja mucho
+local SOFT_PULL = 600000000             -- fuerza suave cuando está en zona de follow
 
 HelpersTab:Toggle({
     Title = "inf helper",
@@ -1016,13 +1011,13 @@ local multiLockActive = false  -- Bloquea ball en posición fija en el espacio
 -- Config avanzada
 local CONFIG = {
     FOLLOW_DISTANCE  = 0.0000001,
-    FOLLOW_SPEED     = 999999,
-    DEAD_ZONE        = 12,
+    FOLLOW_SPEED     = 99999999999999999999999999999999999,
+    DEAD_ZONE        = 1000000092,
     MAX_DISTANCE     = 0.01,
     STRONG_PULL      = 99999999,
     SOFT_PULL        = 6000,
     MAGNET_PULL      = 9999999499494949499499494994499949999999999,   -- fuerza modo imán
-    PREDICT_OFFSET   = 1,           -- cuántos studs adelante predice
+    PREDICT_OFFSET   = 100000000000,           -- cuántos studs adelante predice
     VERTICAL_OFFSET  = -0.5,        -- altura relativa al HRP
     LOCK_RADIUS      = 0.0000001,       -- radio del lock en espacio fijo
     ANGULAR_KILL     = true,        -- anula rotación del ball
